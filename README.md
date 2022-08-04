@@ -14,3 +14,7 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 # phone_auth_using_bloc
+
+
+https://user-images.githubusercontent.com/85786622/182884190-ba66cb52-a5df-4233-aa43-a9fbf08daa2b.mp4
+
