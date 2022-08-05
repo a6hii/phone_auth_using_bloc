@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:phone_auth_demo/blocs/bloc/phone_auth_bloc.dart';
+import 'package:phone_auth_demo/auth/bloc/auth_bloc.dart';
+//import 'package:phone_auth_demo/blocs/bloc/phone_auth_bloc.dart';
 import 'package:phone_auth_demo/screens/login_screen.dart';
 import 'package:phone_auth_demo/widgets/generic_dialog.dart';
 
@@ -30,65 +31,50 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          PopupMenuButton<MenuAction>(
-            onSelected: (value) async {
-              switch (value) {
-                case MenuAction.logout:
-                  final shouldLogout = await showLogOutDialog(context);
-                  if (shouldLogout) {
-                    context.read<PhoneAuthBloc>().add(
-                          PhoneAuthLoggedOut(),
-                        );
-                  }
-              }
-            },
-            itemBuilder: (context) {
-              return [
-                PopupMenuItem<MenuAction>(
-                  value: MenuAction.logout,
-                  child: Text('Logout'),
-                ),
-              ];
-            },
-          )
-        ],
-      ),
-      body: BlocConsumer<PhoneAuthBloc, PhoneAuthState>(
-        listener: (context, state) {
-          if (state is PhoneAuthInitial) {
-            Future.delayed(Duration.zero, () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => LoginScreen(),
-              ));
-            });
-          }
-        },
-        builder: (context, state) {
-          if (state is PhoneAuthLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          return Center(
-              child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // ElevatedButton(
-              //   onPressed: () {
-              //     context.read<PhoneAuthBloc>().add(
-              //           PhoneAuthLoggedOut(),
-              //         );
-              //   },
-              //   child: const Text(
-              //     'Logout',
-              //     style: TextStyle(color: Colors.black),
-              //   ),
-              // ),
-              Text('Home'),
-            ],
-          ));
-        },
-      ),
-    );
+        appBar: AppBar(
+          actions: [
+            PopupMenuButton<MenuAction>(
+              onSelected: (value) async {
+                switch (value) {
+                  case MenuAction.logout:
+                    final shouldLogout = await showLogOutDialog(context);
+                    if (shouldLogout) {
+                      Future.delayed(Duration.zero, () {
+                        context.read<AuthBloc>().add(
+                              LoggedOut(),
+                            );
+                      });
+                    }
+                }
+              },
+              itemBuilder: (context) {
+                return [
+                  const PopupMenuItem<MenuAction>(
+                    value: MenuAction.logout,
+                    child: Text('Logout'),
+                  ),
+                ];
+              },
+            )
+          ],
+        ),
+        body: Center(
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            // ElevatedButton(
+            //   onPressed: () {
+            //     context.read<PhoneAuthBloc>().add(
+            //           PhoneAuthLoggedOut(),
+            //         );
+            //   },
+            //   child: const Text(
+            //     'Logout',
+            //     style: TextStyle(color: Colors.black),
+            //   ),
+            // ),
+            Text('Home'),
+          ],
+        )));
   }
 }

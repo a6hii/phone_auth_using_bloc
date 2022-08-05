@@ -4,7 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:phone_auth_demo/blocs/bloc/phone_auth_bloc.dart';
+import 'package:phone_auth_demo/bloc/login_bloc.dart';
+//import 'package:phone_auth_demo/blocs/bloc/phone_auth_bloc.dart';
 import 'package:phone_auth_demo/screens/home_screen.dart';
 import 'package:phone_auth_demo/screens/new_user_signup_screen.dart';
 import 'package:phone_auth_demo/screens/select_city_screen.dart';
@@ -39,35 +40,26 @@ class OtpVerificationScreen extends StatelessWidget {
     // }
 
     return Scaffold(
-      body: BlocConsumer<PhoneAuthBloc, PhoneAuthState>(
+      body: BlocConsumer<LoginBloc, LoginState>(
         listener: (context, state) {
-          if (state is PhoneAuthCodeVerificationSuccess) {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(
-              builder: (_) => FirebaseAuth.instance.currentUser!.email == null
-                  ? NewUserSignupScreen()
-                  : const HomeScreen(),
-            ));
-          } else if (state is PhoneAuthCodeVerficationFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(state.message),
-              elevation: 2,
-              behavior: SnackBarBehavior.floating,
-              margin: const EdgeInsets.all(24),
-              backgroundColor: Colors.blue,
-            ));
-          } else if (state is PhoneAuthCodeAutoRetrevalTimeoutComplete) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content:
-                  Text('Can\'t autofill OTP. Please type the otp manually.'),
-              elevation: 2,
-              behavior: SnackBarBehavior.floating,
-              margin: EdgeInsets.all(24),
-              backgroundColor: Colors.blue,
-            ));
+          if (state is OtpExceptionState) {
+            String message = state.message;
+
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  content: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [Text(message), const Icon(Icons.error)],
+                  ),
+                  backgroundColor: Colors.red,
+                ),
+              );
           }
         },
         builder: (context, state) {
-          if (state is PhoneAuthLoading) {
+          if (state is LoadingState) {
             return const Center(child: CircularProgressIndicator());
           }
           return Center(
@@ -91,11 +83,9 @@ class OtpVerificationScreen extends StatelessWidget {
               ),
               OutlinedButton(
                 onPressed: () {
-                  if (state is PhoneAuthNumberVerificationSuccess) {
-                    context.read<PhoneAuthBloc>().add(PhoneAuthCodeVerified(
-                        smsCode: _otpController.text,
-                        verificationId: state.verificationId));
-                  }
+                  context.read<LoginBloc>().add(VerifyOtpEvent(
+                        otp: _otpController.text,
+                      ));
                 },
                 child: const Text('Verify'),
               ),

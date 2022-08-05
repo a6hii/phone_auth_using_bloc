@@ -1,37 +1,37 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart' as auth;
-// import 'package:phone_auth_demo/models/user_model.dart';
-// import 'package:phone_auth_demo/repo/base_user_repo.dart';
+import "package:firebase_auth/firebase_auth.dart";
 
-// class DatabaseRepository extends BaseUserRepository {
-//   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
+class UserRepository {
+  final FirebaseAuth _firebaseAuth;
 
-//   // @override
-//   // Stream<User> getUser(String userId) {
-//   //   print('Getting user images from DB');
-//   //   return _firebaseFirestore
-//   //       .collection('users')
-//   //       .doc(userId)
-//   //       .snapshots()
-//   //       .map((snap) => User.fromSnapshot(snap));
-//   // }
+  UserRepository({FirebaseAuth? firebaseAuth})
+      : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
 
-//   @override
-//   Future<void> createUser(User user) async {
-//     await _firebaseFirestore
-//         .collection('users')
-//         .doc(user.uid)
-//         .set(user.toMap());
-//   }
+  Future<void> sendOtp(
+      String phoneNumber,
+      Duration timeOut,
+      PhoneVerificationFailed phoneVerificationFailed,
+      PhoneVerificationCompleted phoneVerificationCompleted,
+      PhoneCodeSent phoneCodeSent,
+      PhoneCodeAutoRetrievalTimeout autoRetrievalTimeout) async {
+    _firebaseAuth.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        timeout: timeOut,
+        verificationCompleted: phoneVerificationCompleted,
+        verificationFailed: phoneVerificationFailed,
+        codeSent: phoneCodeSent,
+        codeAutoRetrievalTimeout: autoRetrievalTimeout);
+  }
 
-//   @override
-//   Future<void> updateUser(User user) async {
-//     return _firebaseFirestore
-//         .collection('users')
-//         .doc(user.uid)
-//         .update(user.toMap())
-//         .then(
-//           (value) => print('User document updated.'),
-//         );
-//   }
-// }
+  Future<UserCredential> verifyAndLogin(
+      String verificationId, String smsCode) async {
+    AuthCredential authCredential = PhoneAuthProvider.credential(
+        verificationId: verificationId, smsCode: smsCode);
+
+    return _firebaseAuth.signInWithCredential(authCredential);
+  }
+
+  Future<User?> getUser() async {
+    var user = _firebaseAuth.currentUser;
+    return user;
+  }
+}
